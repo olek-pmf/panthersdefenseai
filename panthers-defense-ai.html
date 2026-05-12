@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panthers Defense Suggester</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== TOKENS ===================== */
+:root, [data-theme="light"] {
+  --color-bg: #f5f4f0;
+  --color-surface: #f9f8f5;
+  --color-surface-2: #ffffff;
+  --color-surface-offset: #eceae4;
+  --color-surface-dynamic: #e3e0da;
+  --color-divider: #d8d5ce;
+  --color-border: #ccc9c2;
+  --color-text: #1a1a17;
+  --color-text-muted: #6b6a64;
+  --color-text-faint: #b0afaa;
+  --color-text-inverse: #f5f4f0;
+  --color-primary: #c9282d;
+  --color-primary-hover: #a31f24;
+  --color-primary-active: #7d161a;
+  --color-primary-highlight: #f5d0d1;
+  --color-secondary: #1a1a17;
+  --color-gold: #d4a017;
+  --color-gold-hover: #b8891a;
+  --color-success: #2d7a3a;
+  --color-success-highlight: #d0e8d3;
+  --color-warning: #b8630a;
+  --color-warning-highlight: #fdebd0;
+  --color-error: #c9282d;
+  --color-info: #1e5b8a;
+  --color-info-highlight: #d0e4f5;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+  --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
+  --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
+  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem; --space-20: 5rem;
+  --font-display: 'Oswald', 'Impact', sans-serif;
+  --font-body: 'Inter', 'Helvetica Neue', sans-serif;
+  --content-default: 1100px;
+}
+[data-theme="dark"] {
+  --color-bg: #111110;
+  --color-surface: #171615;
+  --color-surface-2: #1e1d1b;
+  --color-surface-offset: #1b1a18;
+  --color-surface-dynamic: #252422;
+  --color-divider: #1f1e1c;
+  --color-border: #302e2c;
+  --color-text: #e8e6e2;
+  --color-text-muted: #7a7874;
+  --color-text-faint: #4a4946;
+  --color-text-inverse: #111110;
+  --color-primary: #e84047;
+  --color-primary-hover: #c9282d;
+  --color-primary-highlight: #3d1e1f;
+  --color-gold: #e8b830;
+  --color-success: #4a9e5a;
+  --color-success-highlight: #1a3020;
+  --color-warning: #e87820;
+  --color-warning-highlight: #3a2010;
+  --color-info: #3a90d0;
+  --color-info-highlight: #1a2d40;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.35);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+}
+/* ===================== BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+}
+img { display: block; max-width: 100%; }
+button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
+a, button { transition: color var(--transition-interactive), background var(--transition-interactive), box-shadow var(--transition-interactive); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-sm); }
+
+/* ===================== HEADER ===================== */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-3) var(--space-6);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-brand { display: flex; align-items: center; gap: var(--space-3); }
+.logo-svg { width: 36px; height: 36px; flex-shrink: 0; }
+.brand-text { display: flex; flex-direction: column; }
+.brand-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.brand-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.header-actions { display: flex; align-items: center; gap: var(--space-3); }
+.badge-city {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.theme-toggle {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-offset);
+}
+.theme-toggle:hover { color: var(--color-text); background: var(--color-surface-dynamic); }
+
+/* ===================== LAYOUT ===================== */
+.main { max-width: var(--content-default); margin: 0 auto; padding: var(--space-8) var(--space-6); }
+
+/* ===================== HERO STRIP ===================== */
+.hero-strip {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-active, #7d161a) 100%);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8) var(--space-10);
+  margin-bottom: var(--space-8);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-6);
+  overflow: hidden; position: relative;
+}
+.hero-strip::before {
+  content: '';
+  position: absolute; right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.hero-strip::after {
+  content: '';
+  position: absolute; right: 60px; bottom: -60px;
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.hero-text h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  margin-bottom: var(--space-2);
+}
+.hero-text p { font-size: var(--text-sm); color: rgba(255,255,255,0.75); max-width: 52ch; }
+.hero-stat { text-align: right; flex-shrink: 0; }
+.hero-stat-num {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+.hero-stat-label { font-size: var(--text-xs); color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* ===================== TWO COLUMN ===================== */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-6); }
+
+/* ===================== PANEL ===================== */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.panel-header {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-offset);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.panel-header-icon {
+  width: 28px; height: 28px;
+  background: var(--color-primary);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+.panel-title {
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
+}
+.panel-subtitle { font-size: var(--text-xs); color: var(--color-text-muted); }
+.panel-body { padding: var(--space-5); }
+
+/* ===================== PLAY SELECTOR ===================== */
+.formation-tabs {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.tab-btn {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  background: var(--color-surface-offset);
+  transition: all var(--transition-interactive);
+}
+.tab-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.tab-btn.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.plays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--space-2);
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+.plays-grid::-webkit-scrollbar { width: 4px; }
+.plays-grid::-webkit-scrollbar-track { background: var(--color-surface-offset); border-radius: 2px; }
+.plays-grid::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
+.play-card {
+  background: var(--color-surface-2);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: all var(--transition-interactive);
+  position: relative;
+}
+.play-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.play-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-highlight);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 20%, transparent);
+}
+.play-card-formation {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+}
+.play-card-name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+.play-card-num {
+  position: absolute; top: var(--space-2); right: var(--space-2);
+  font-size: 10px;
+  color: var(--color-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.play-card.selected .play-card-name { color: var(--color-primary); }
+
+/* ===================== RESULT PANEL ===================== */
+.result-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: var(--space-12) var(--space-6); text-align: center; gap: var(--space-3);
+  color: var(--color-text-faint);
+}
+.result-empty svg { opacity: 0.3; }
+.result-empty p { font-size: var(--text-sm); color: var(--color-text-muted); max-width: 28ch; }
+
+.result-content { display: none; }
+.result-content.visible { display: block; }
+.result-empty-wrap { display: block; }
+.result-empty-wrap.hidden { display: none; }
+
+.selected-play-display {
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+  display: flex; align-items: center; gap: var(--space-3);
+}
+.selected-play-display .arrow { color: var(--color-primary); font-size: var(--text-lg); font-weight: 700; }
+.selected-play-label { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.selected-play-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
+.selected-play-formation {
+  font-size: var(--text-xs); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-primary);
+  background: var(--color-primary-highlight);
+  border-radius: var(--radius-full);
+  padding: 2px var(--space-2);
+}
+
+.reco-heading {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.defense-cards { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.defense-reco {
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--color-border);
+  overflow: hidden;
+  background: var(--color-surface-2);
+  transition: all var(--transition-interactive);
+}
+.defense-reco:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+.defense-reco.rank-1 { border-color: var(--color-gold); }
+.defense-reco.rank-2 { border-color: var(--color-primary); }
+.defense-reco.rank-3 { border-color: var(--color-border); }
+
+.defense-reco-top {
+  padding: var(--space-3) var(--space-4);
+  display: flex; align-items: flex-start; gap: var(--space-3);
+}
+.rank-badge {
+  width: 28px; height: 28px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: var(--text-sm); font-weight: 700;
+  flex-shrink: 0;
+}
+.rank-1 .rank-badge { background: var(--color-gold); color: #1a1a17; }
+.rank-2 .rank-badge { background: var(--color-primary); color: #fff; }
+.rank-3 .rank-badge { background: var(--color-surface-dynamic); color: var(--color-text-muted); }
+
+.defense-reco-info { flex: 1; }
+.defense-reco-type {
+  font-size: var(--text-xs); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+.defense-reco-name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+.defense-reco.rank-1 .defense-reco-name { color: var(--color-gold); }
+.defense-reco.rank-2 .defense-reco-name { color: var(--color-primary); }
+
+.match-score-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); flex-shrink: 0; }
+.match-score {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1;
+}
+.rank-1 .match-score { color: var(--color-gold); }
+.rank-2 .match-score { color: var(--color-primary); }
+.rank-3 .match-score { color: var(--color-text-muted); }
+.match-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-faint); }
+
+.match-bar-wrap { padding: 0 var(--space-4) var(--space-1); }
+.match-bar-bg {
+  height: 4px; border-radius: var(--radius-full);
+  background: var(--color-surface-dynamic); overflow: hidden;
+}
+.match-bar-fill {
+  height: 100%; border-radius: var(--radius-full);
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rank-1 .match-bar-fill { background: var(--color-gold); }
+.rank-2 .match-bar-fill { background: var(--color-primary); }
+.rank-3 .match-bar-fill { background: var(--color-text-faint); }
+
+.defense-reco-reason {
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  border-top: 1px solid var(--color-divider);
+}
+.defense-reco-reason strong { color: var(--color-text); }
+
+.tags { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.tag {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+}
+.tag-green { background: var(--color-success-highlight); color: var(--color-success); }
+.tag-red { background: var(--color-primary-highlight); color: var(--color-primary); }
+.tag-yellow { background: var(--color-warning-highlight); color: var(--color-warning); }
+.tag-blue { background: var(--color-info-highlight); color: var(--color-info); }
+
+/* ===================== MATCHUP RADAR ===================== */
+.radar-panel { margin-top: var(--space-6); }
+.radar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+.radar-item {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+}
+.radar-label { font-size: var(--text-xs); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-2); }
+.radar-bar-bg { height: 6px; border-radius: var(--radius-full); background: var(--color-surface-dynamic); overflow: hidden; margin-bottom: var(--space-1); }
+.radar-bar-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-primary); transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.radar-value { font-size: var(--text-xs); font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; }
+
+/* ===================== FOOTNOTE ===================== */
+.disclaimer {
+  margin-top: var(--space-8);
+  padding: var(--space-4) var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  display: flex; gap: var(--space-3); align-items: flex-start;
+}
+.disclaimer svg { flex-shrink: 0; color: var(--color-text-faint); margin-top: 2px; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+  .main { padding: var(--space-4) var(--space-4); }
+  .two-col { grid-template-columns: 1fr; }
+  .hero-strip { flex-direction: column; padding: var(--space-6); }
+  .hero-stat { text-align: left; }
+  .radar-grid { grid-template-columns: repeat(2, 1fr); }
+  .plays-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}
+
+/* Scroll animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.defense-reco { animation: fadeUp 0.3s ease forwards; }
+.defense-reco:nth-child(2) { animation-delay: 0.05s; }
+.defense-reco:nth-child(3) { animation-delay: 0.1s; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <svg class="logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Panthers Wroclaw logo">
+      <rect width="36" height="36" rx="8" fill="#c9282d"/>
+      <path d="M8 28 L18 8 L28 28 L21 28 L18 20 L15 28 Z" fill="white"/>
+      <path d="M11 22 H25" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="brand-text">
+      <span class="brand-name">Panthers</span>
+      <span class="brand-sub">Wrocław · Defense AI</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="badge-city">Flag Football</span>
+    <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main" role="main">
+
+  <!-- Hero -->
+  <div class="hero-strip">
+    <div class="hero-text">
+      <h1>Defense Play Suggester</h1>
+      <p>Select an offensive play from the Panthers playbook and get the optimal defensive counter — based on formation type, route concepts, and coverage matchups.</p>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-num">24</div>
+      <div class="hero-stat-label">Offense Plays</div>
+      <div style="margin-top:var(--space-2)">
+        <div class="hero-stat-num" style="font-size:var(--text-xl)">10</div>
+        <div class="hero-stat-label">Defense Plays</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two column -->
+  <div class="two-col">
+
+    <!-- LEFT: Offense Selector -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9z"/></svg>
+        </div>
+        <div>
+          <div class="panel-title">Offense Play</div>
+          <div class="panel-subtitle">Select the formation the opponent is running</div>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="formation-tabs" id="formationTabs"></div>
+        <div class="plays-grid" id="playsGrid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Defense Suggestion -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-header-icon" style="background:var(--color-gold)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="panel-title">Best Defense Counter</div>
+          <div class="panel-subtitle">AI-matched defensive play suggestions</div>
+        </div>
+      </div>
+      <div class="panel-body" id="resultPanel">
+
+        <div class="result-empty-wrap" id="emptyState">
+          <div class="result-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <p>Select an offense play on the left to see the best defensive counters</p>
+          </div>
+        </div>
+
+        <div class="result-content" id="resultContent">
+          <div class="selected-play-display">
+            <span class="arrow">↗</span>
+            <div>
+              <div class="selected-play-label">Offense Running</div>
+              <div class="selected-play-name" id="displayPlayName">—</div>
+            </div>
+            <span class="selected-play-formation" id="displayPlayFormation">—</span>
+          </div>
+          <div class="reco-heading">Top Defensive Counters</div>
+          <div class="defense-cards" id="defenseCards"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Matchup Analysis -->
+  <div class="panel radar-panel" id="radarSection" style="display:none">
+    <div class="panel-header">
+      <div class="panel-header-icon" style="background:#1e5b8a">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="panel-title">Matchup Breakdown</div>
+        <div class="panel-subtitle">Threat dimensions for the selected offense play</div>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="radar-grid" id="radarGrid"></div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>Suggestions are based on formation type, route concepts, and coverage logic from the Panthers Wrocław playbook. Final call always belongs to the defensive coordinator. Plays without detailed route diagrams use formation-level analysis.</span>
+  </div>
+
+</main>
+
+<script>
+// ===================== DATA =====================
+const OFFENSE_PLAYS = [
+  // Twins Bunch
+  { id:1, formation:"Twins Bunch", name:"Pelican", threats:["Bunch routes","Picks/rubs","Short & mid"], routeType:"bunch", spread:"tight", rush:false, deep:false, short:true, mid:true },
+  { id:2, formation:"Twins Bunch", name:"Mouse",   threats:["Bunch routes","Quick hitters","Pick routes"], routeType:"bunch", spread:"tight", rush:false, deep:false, short:true, mid:false },
+  { id:3, formation:"Twins Bunch", name:"Ox",      threats:["Bunch crossing","Power routes","Iso routes"], routeType:"bunch", spread:"tight", rush:false, deep:true, short:false, mid:true },
+  // Trips
+  { id:4, formation:"Trips", name:"Cat",     threats:["3-receiver side","Flood concept","Overload right"], routeType:"trips", spread:"wide", rush:false, deep:false, short:true, mid:true },
+  { id:5, formation:"Trips", name:"Dog",     threats:["Trips flood","Iso slot","Vertical stretch"], routeType:"trips", spread:"wide", rush:false, deep:true, short:false, mid:true },
+  { id:6, formation:"Trips", name:"Penguin", threats:["Trips bunch cross","Backfield motion","Multiple threats"], routeType:"trips", spread:"wide", rush:true, deep:true, short:true, mid:false },
+  // Split
+  { id:7,  formation:"Split", name:"Ostrich", threats:["1-on-1 matchups","Balanced routes","Seam reads"], routeType:"split", spread:"wide", rush:false, deep:false, short:true, mid:true },
+  { id:8,  formation:"Split", name:"Hyena",   threats:["Motion pre-snap","Mismatch creation","Back route"], routeType:"split", spread:"wide", rush:true, deep:false, short:true, mid:false },
+  { id:9,  formation:"Split", name:"Eagle",   threats:["Vertical shots","Seam routes","Double deep"], routeType:"split", spread:"wide", rush:false, deep:true, short:false, mid:true },
+  { id:10, formation:"Split", name:"Falcon",  threats:["Speed routes","Crossing routes","Quick slants"], routeType:"split", spread:"wide", rush:false, deep:false, short:true, mid:true },
+  { id:11, formation:"Split", name:"Spider",  threats:["Spider concept","Multi-route options","QB scramble"], routeType:"split", spread:"wide", rush:true, deep:true, short:false, mid:true },
+  // Twins
+  { id:12, formation:"Twins", name:"Bear",   threats:["2-receiver set","Iso routes","Stack concept"], routeType:"twins", spread:"medium", rush:false, deep:false, short:false, mid:true },
+  { id:13, formation:"Twins", name:"Lion",   threats:["WR iso","Deep shots","Corner routes"], routeType:"twins", spread:"medium", rush:false, deep:true, short:false, mid:false },
+  { id:14, formation:"Twins", name:"Sparrow", threats:["Quick passes","Slants","Motion"], routeType:"twins", spread:"medium", rush:false, deep:false, short:true, mid:false },
+  { id:15, formation:"Twins", name:"Pigeon",  threats:["Underneath routes","Checkdowns","Backfield threat"], routeType:"twins", spread:"medium", rush:true, deep:false, short:true, mid:false },
+  // Twins Squeeze
+  { id:16, formation:"Twins Squeeze", name:"Octopus",  threats:["Compressed routes","Pick/rub","Inside leverage"], routeType:"squeeze", spread:"tight", rush:false, deep:false, short:true, mid:true },
+  { id:17, formation:"Twins Squeeze", name:"Bug",      threats:["Tight alignment","Quick hits","Route combinations"], routeType:"squeeze", spread:"tight", rush:false, deep:false, short:true, mid:false },
+  { id:18, formation:"Twins Squeeze", name:"Viper",    threats:["Compressed attack","Back routes","Mismatch speed"], routeType:"squeeze", spread:"tight", rush:true, deep:true, short:false, mid:true },
+  { id:19, formation:"Twins Squeeze", name:"Scorpion", threats:["Short-side flood","Pick concept","Backfield motion"], routeType:"squeeze", spread:"tight", rush:true, deep:false, short:true, mid:true },
+  { id:20, formation:"Twins Squeeze", name:"Seagull",  threats:["Release routes","Spacing","Flat routes"], routeType:"squeeze", spread:"tight", rush:false, deep:false, short:true, mid:false },
+  // Queen
+  { id:21, formation:"Queen", name:"Dolphin",   threats:["Backfield-heavy","Motion","Iso reads","Overload"], routeType:"queen", spread:"medium", rush:true, deep:false, short:true, mid:true },
+  { id:22, formation:"Queen", name:"Starfish",  threats:["Multi-back motion","Late release","Deception"], routeType:"queen", spread:"medium", rush:true, deep:true, short:false, mid:true },
+  // Tricks
+  { id:23, formation:"Tricks", name:"Rabbit",   threats:["Fake/misdirection","WR pass option","Surprise timing"], routeType:"trick", spread:"varies", rush:false, deep:true, short:false, mid:false },
+  { id:24, formation:"Tricks", name:"Phoenix",  threats:["Full deception","Reverse/trick","All-position threat"], routeType:"trick", spread:"varies", rush:true, deep:true, short:false, mid:true },
+];
+
+const DEFENSE_PLAYS = [
+  {
+    id:1, code:"KISS", name:"Base Tight Man to Man", abbrev:"Man-to-Man (KISS)",
+    type:"Base", coverage:"Man", rush:false, freeze:false,
+    goodVs:["bunch","squeeze","trick","queen"], okVs:["twins","split"],
+    weakVs:["trips"],
+    strengths:["Tight coverage on bunch picks","Negates rub routes","Disciplined man assignments"],
+    desc:"Tight man coverage works well against compressed formations like Twins Bunch and Squeeze that rely on pick routes. Each defender locks onto their man and doesn't get rubbed off.",
+    tags:["man","no-rush","base","anti-pick"]
+  },
+  {
+    id:2, code:"WAVE", name:"Base Wide Men to Men", abbrev:"Wide Man-to-Man (WAVE)",
+    type:"Base", coverage:"Man", rush:false, freeze:false,
+    goodVs:["split","twins","trips"], okVs:["bunch","squeeze"],
+    weakVs:["queen","trick"],
+    strengths:["1-on-1 coverage across field","Prevents YAC","Good vs. spread formations"],
+    desc:"Wide man coverage gives defenders room to stay on top of routes. Best against spread formations where receivers are isolated — neutralizes Split and Trips route combinations.",
+    tags:["man","no-rush","base","wide-spread"]
+  },
+  {
+    id:3, code:"UNICORN", name:"Base Wide Cover 1", abbrev:"Cover 1 (UNICORN)",
+    type:"Base", coverage:"Cover 1", rush:false, freeze:false,
+    goodVs:["split","twins","trips"], okVs:["bunch"],
+    weakVs:["queen","squeeze"],
+    strengths:["1 deep safety over the top","Underneath man","Good vs. vertical threats"],
+    desc:"Cover 1 provides one deep safety on top of man coverage underneath. Strong against vertical threats from Split and Trips formations that look to attack the seam.",
+    tags:["zone","1-deep","base","anti-vertical"]
+  },
+  {
+    id:4, code:"BULL", name:"Base Wide Cover 2", abbrev:"Cover 2 (BULL)",
+    type:"Base", coverage:"Cover 2", rush:false, freeze:false,
+    goodVs:["split","twins","trick"], okVs:["trips","bunch"],
+    weakVs:["queen","squeeze"],
+    strengths:["2 deep safeties","Protects corners","Limits big plays"],
+    desc:"Two-deep zone with corner flats. Cover 2 is a safe, balanced defense limiting big plays. Very effective against horizontal threats and trick plays that rely on surprise timing.",
+    tags:["zone","2-deep","base","balanced"]
+  },
+  {
+    id:5, code:"HURRICANE", name:"Rush Wide Cover 2 Blitz", abbrev:"Cover 2 Blitz (HURRICANE)",
+    type:"Rush", coverage:"Cover 2", rush:true, freeze:false,
+    goodVs:["queen","trick","bunch"], okVs:["squeeze","twins"],
+    weakVs:["trips","split"],
+    strengths:["Pressure on QB","Cover 2 behind blitz","Disrupts backfield motion plays"],
+    desc:"Blitz with Cover 2 behind it. Ideal against Queen and Trick plays that depend on timing and backfield motion — the extra rusher disrupts the timing before routes develop.",
+    tags:["blitz","zone","2-deep","anti-QB","pressure"]
+  },
+  {
+    id:6, code:"STORM", name:"Rush Wide Cover 3 Double Blitz", abbrev:"Double Blitz (STORM)",
+    type:"Rush", coverage:"Cover 3", rush:true, freeze:false,
+    goodVs:["queen","trick","squeeze"], okVs:["bunch","twins"],
+    weakVs:["trips","split"],
+    strengths:["Maximum QB pressure","Cover 3 thirds","Disrupts timing routes","All-out attack"],
+    desc:"Double blitz with three-zone coverage behind. Use against Trick and Queen plays to destroy timing. Cover 3 holds the field if the QB dumps off quickly.",
+    tags:["blitz","zone","3-zone","max-pressure","all-in"]
+  },
+  {
+    id:7, code:"HYDRA", name:"Freeze Cover 3", abbrev:"Freeze Cover 3 (HYDRA)",
+    type:"Freeze", coverage:"Cover 3", rush:false, freeze:true,
+    goodVs:["trips","split","twins"], okVs:["bunch"],
+    weakVs:["queen","trick"],
+    strengths:["Three deep zones","Confuse QB reads","No rush — protection first"],
+    desc:"Freeze Cover 3 holds defenders in place to confuse QB reads before releasing to three deep thirds. Excellent against Trips and Split formations that require QB to read and react.",
+    tags:["zone","3-deep","freeze","anti-read","confuse"]
+  },
+  {
+    id:8, code:"COW", name:"Freeze Cover 2", abbrev:"Freeze Cover 2 (COW)",
+    type:"Freeze", coverage:"Cover 2", rush:false, freeze:true,
+    goodVs:["twins","split","trick"], okVs:["trips","bunch"],
+    weakVs:["queen"],
+    strengths:["Disciplined two-deep","Freeze disguise","Limits big plays safely"],
+    desc:"Freeze Cover 2 disguises coverage before the snap. Works well against spread formations like Twins and Split that need the QB to identify coverage pre-snap.",
+    tags:["zone","2-deep","freeze","disguise","safe"]
+  },
+  {
+    id:9, code:"COWBOY", name:"Base Wide Cover 2 Reversed", abbrev:"Cover 2 Reversed (COWBOY)",
+    type:"Base", coverage:"Cover 2 Rev.", rush:false, freeze:false,
+    goodVs:["trips","split","bunch"], okVs:["twins"],
+    weakVs:["queen","trick"],
+    strengths:["Flipped coverage responsibilities","Confuses route assignments","Anti-flood on 3-receiver side"],
+    desc:"Reversed Cover 2 assignments flip coverage roles to confuse receivers expecting standard coverage. Especially effective against Trips flood and bunch side overloads.",
+    tags:["zone","2-deep","reversed","anti-flood","trips-side"]
+  },
+  {
+    id:10, code:"SPY", name:"Spy - Rusher Adjustment", abbrev:"Spy (Rusher Adjust)",
+    type:"Adjustment", coverage:"Variable", rush:true, freeze:false,
+    goodVs:["queen","trick","split"], okVs:["twins","bunch"],
+    weakVs:["trips"],
+    strengths:["Spy on QB","Rushes when QB scrambles","Adaptable coverage behind"],
+    desc:"A rusher plays spy on the QB, following and reacting to scrambles and designed QB runs. Perfect against Queen and Spider/Trick plays where the QB is a running threat.",
+    tags:["adjustment","spy","anti-scramble","flexible","rush"]
+  },
+];
+
+// ===================== MATCHING LOGIC =====================
+function scoreDefenseVsOffense(def, off) {
+  let score = 0;
+  const rt = off.routeType;
+
+  if (def.goodVs.includes(rt)) score += 40;
+  else if (def.okVs.includes(rt)) score += 20;
+  else if (def.weakVs.includes(rt)) score -= 15;
+
+  // Rush plays: blitz disrupts backfield-heavy plays
+  if (off.rush && def.rush) score += 15;
+  if (off.rush && !def.rush && !def.freeze) score -= 10;
+
+  // Deep threats: zone / multi-deep helps
+  if (off.deep) {
+    if (def.coverage === "Cover 2" || def.coverage === "Cover 3" || def.coverage === "Cover 2 Rev.") score += 12;
+    if (def.coverage === "Cover 1") score += 8;
+  }
+
+  // Short game: man coverage disciplines short routes
+  if (off.short && def.coverage === "Man") score += 10;
+  if (off.short && def.freeze) score += 8; // freeze disrupts timing
+
+  // Trick plays: blitz or balanced zone
+  if (rt === "trick") {
+    if (def.rush) score += 12;
+    if (def.coverage === "Cover 2" || def.coverage === "Cover 2 Rev.") score += 8;
+  }
+
+  // Squeeze / bunch: tight man very strong
+  if ((rt === "squeeze" || rt === "bunch") && def.coverage === "Man" && !def.freeze) score += 15;
+
+  // Queen / backfield motion: pressure needed
+  if (rt === "queen" && def.rush) score += 20;
+  if (rt === "queen" && !def.rush) score -= 8;
+
+  // Trips flood: reversed coverage or 3-zone
+  if (rt === "trips") {
+    if (def.code === "COWBOY") score += 20;
+    if (def.coverage === "Cover 3") score += 10;
+  }
+
+  // Freeze adds confuse factor
+  if (def.freeze) {
+    if (off.mid || off.short) score += 8; // QB needs to read coverage
+  }
+
+  return Math.min(99, Math.max(0, score + 40));
+}
+
+function getDefenseSuggestions(offPlay) {
+  const scored = DEFENSE_PLAYS.map(def => ({
+    ...def,
+    score: scoreDefenseVsOffense(def, offPlay)
+  }));
+  scored.sort((a,b) => b.score - a.score);
+  return scored.slice(0, 3);
+}
+
+function getThreatDimensions(offPlay) {
+  return [
+    { label: "Short Game Threat", value: offPlay.short ? 85 : 25 },
+    { label: "Mid Range Threat", value: offPlay.mid ? 80 : 30 },
+    { label: "Deep Threat", value: offPlay.deep ? 85 : 20 },
+    { label: "Backfield Motion", value: offPlay.rush ? 80 : 20 },
+    { label: "Route Complexity", value: offPlay.routeType === "trick" ? 95 : offPlay.routeType === "queen" ? 80 : offPlay.routeType === "trips" ? 75 : 60 },
+    { label: "Pick/Rub Risk", value: (offPlay.routeType === "bunch" || offPlay.routeType === "squeeze") ? 85 : offPlay.routeType === "trips" ? 50 : 25 },
+  ];
+}
+
+// ===================== UI =====================
+const formations = [...new Set(OFFENSE_PLAYS.map(p => p.formation))];
+let activeFormation = "All";
+let selectedPlay = null;
+
+function renderFormationTabs() {
+  const el = document.getElementById("formationTabs");
+  const tabs = ["All", ...formations];
+  el.innerHTML = tabs.map(f =>
+    `<button class="tab-btn ${f === activeFormation ? 'active' : ''}" data-formation="${f}">${f}</button>`
+  ).join("");
+  el.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      activeFormation = btn.dataset.formation;
+      renderFormationTabs();
+      renderPlaysGrid();
+    });
+  });
+}
+
+function renderPlaysGrid() {
+  const el = document.getElementById("playsGrid");
+  const filtered = activeFormation === "All"
+    ? OFFENSE_PLAYS
+    : OFFENSE_PLAYS.filter(p => p.formation === activeFormation);
+
+  el.innerHTML = filtered.map(p =>
+    `<div class="play-card ${selectedPlay && selectedPlay.id === p.id ? 'selected' : ''}" data-id="${p.id}" role="button" tabindex="0">
+      <span class="play-card-num">#${p.id}</span>
+      <div class="play-card-formation">${p.formation}</div>
+      <div class="play-card-name">${p.name}</div>
+    </div>`
+  ).join("");
+
+  el.querySelectorAll(".play-card").forEach(card => {
+    const activate = () => {
+      const play = OFFENSE_PLAYS.find(p => p.id === parseInt(card.dataset.id));
+      selectedPlay = play;
+      renderPlaysGrid();
+      renderResult();
+    };
+    card.addEventListener("click", activate);
+    card.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " ") activate(); });
+  });
+}
+
+function getRankClass(idx) {
+  return idx === 0 ? "rank-1" : idx === 1 ? "rank-2" : "rank-3";
+}
+
+function renderResult() {
+  if (!selectedPlay) return;
+  document.getElementById("emptyState").classList.add("hidden");
+  document.getElementById("resultContent").classList.add("visible");
+
+  document.getElementById("displayPlayName").textContent = selectedPlay.name;
+  document.getElementById("displayPlayFormation").textContent = selectedPlay.formation;
+
+  const suggestions = getDefenseSuggestions(selectedPlay);
+  const cardsEl = document.getElementById("defenseCards");
+
+  cardsEl.innerHTML = suggestions.map((def, idx) => {
+    const rankClass = getRankClass(idx);
+    const rankNum = idx + 1;
+    const pct = def.score;
+    const tagHtml = def.tags.slice(0,3).map(t => {
+      const color = t.includes("blitz") || t.includes("rush") ? "tag-red"
+        : t.includes("zone") || t.includes("deep") ? "tag-blue"
+        : t.includes("man") ? "tag-green"
+        : "tag-yellow";
+      return `<span class="tag ${color}">${t}</span>`;
+    }).join("");
+
+    return `<div class="defense-reco ${rankClass}">
+      <div class="defense-reco-top">
+        <div class="rank-badge">${rankNum}</div>
+        <div class="defense-reco-info">
+          <div class="defense-reco-type">${def.type} · ${def.coverage}</div>
+          <div class="defense-reco-name">${def.abbrev}</div>
+          <div class="tags">${tagHtml}</div>
+        </div>
+        <div class="match-score-wrap">
+          <div class="match-score">${pct}%</div>
+          <div class="match-label">Match</div>
+        </div>
+      </div>
+      <div class="match-bar-wrap">
+        <div class="match-bar-bg"><div class="match-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="defense-reco-reason">
+        <strong>${def.strengths[0]}.</strong> ${def.desc}
+      </div>
+    </div>`;
+  }).join("");
+
+  // Radar
+  document.getElementById("radarSection").style.display = "block";
+  const dims = getThreatDimensions(selectedPlay);
+  document.getElementById("radarGrid").innerHTML = dims.map(d =>
+    `<div class="radar-item">
+      <div class="radar-label">${d.label}</div>
+      <div class="radar-bar-bg"><div class="radar-bar-fill" style="width:${d.value}%"></div></div>
+      <div class="radar-value">${d.value}/100</div>
+    </div>`
+  ).join("");
+}
+
+// Theme toggle
+(function(){
+  const t = document.querySelector("[data-theme-toggle]");
+  const r = document.documentElement;
+  let d = r.getAttribute("data-theme") || "dark";
+  t && t.addEventListener("click", () => {
+    d = d === "dark" ? "light" : "dark";
+    r.setAttribute("data-theme", d);
+    t.setAttribute("aria-label", "Switch to " + (d === "dark" ? "light" : "dark") + " mode");
+    t.innerHTML = d === "dark"
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+  });
+})();
+
+// Init
+renderFormationTabs();
+renderPlaysGrid();
+</script>
+</body>
+</html>
